@@ -1,0 +1,113 @@
+<!-- usuarios.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usuarios - FitBrAD</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Usuarios</h1>
+    <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+    <nav id="menu" class="hidden">
+      <a href="index.html">Inicio</a>
+      <a href="usuarios.html">Usuarios</a>
+      <a href="habitos.html">Hábitos</a>
+      <a href="retos.html">Retos</a>
+      <a href="registros.html">Registro de Hábitos</a>
+      <a href="participaciones.html">Participaciones</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="buttons">
+      <button onclick="getAllUsuarios()">Obtener todos los usuarios</button>
+
+      <div>
+        <input type="number" id="buscarUsuarioId" placeholder="ID de usuario">
+        <button onclick="buscarUsuario()">Buscar usuario</button>
+      </div>
+
+      <div>
+        <input type="text" id="nuevoNombre" placeholder="Nombre">
+        <input type="email" id="nuevoEmail" placeholder="Email">
+        <button onclick="crearUsuario()">Agregar usuario</button>
+      </div>
+
+      <div>
+        <input type="number" id="actualizarId" placeholder="ID">
+        <input type="text" id="actualizarNombre" placeholder="Nuevo nombre">
+        <input type="email" id="actualizarEmail" placeholder="Nuevo email">
+        <button onclick="actualizarUsuario()">Actualizar usuario</button>
+      </div>
+
+      <div>
+        <input type="number" id="eliminarId" placeholder="ID a eliminar">
+        <button onclick="eliminarUsuario()">Eliminar usuario</button>
+      </div>
+    </div>
+
+    <div id="resultado" class="resultado"></div>
+  </main>
+
+  <script src="menu.js"></script>
+  <script>
+    const api = 'http://localhost:3000/usuarios';
+
+    function mostrarResultado(data) {
+      document.getElementById('resultado').textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function getAllUsuarios() {
+      const res = await fetch(api);
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function buscarUsuario() {
+      const id = document.getElementById('buscarUsuarioId').value;
+      const res = await fetch(`${api}/${id}`);
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function crearUsuario() {
+      const nombre = document.getElementById('nuevoNombre').value;
+      const email = document.getElementById('nuevoEmail').value;
+
+      const res = await fetch(api, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, email })
+      });
+
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function actualizarUsuario() {
+      const id = document.getElementById('actualizarId').value;
+      const nombre = document.getElementById('actualizarNombre').value;
+      const email = document.getElementById('actualizarEmail').value;
+
+      const res = await fetch(`${api}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, email })
+      });
+
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function eliminarUsuario() {
+      const id = document.getElementById('eliminarId').value;
+      const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+  </script>
+</body>
+</html>

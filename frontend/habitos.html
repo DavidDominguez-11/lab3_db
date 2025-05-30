@@ -1,0 +1,121 @@
+<!-- habitos.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hábitos - FitBrAD</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Hábitos</h1>
+    <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+    <nav id="menu" class="hidden">
+      <a href="index.html">Inicio</a>
+      <a href="usuarios.html">Usuarios</a>
+      <a href="habitos.html">Hábitos</a>
+      <a href="retos.html">Retos</a>
+      <a href="registros.html">Registro de Hábitos</a>
+      <a href="participaciones.html">Participaciones</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="buttons">
+      <button onclick="getAllHabitos()">Obtener todos los hábitos</button>
+
+      <div>
+        <input type="number" id="buscarHabitoId" placeholder="ID del hábito">
+        <button onclick="buscarHabito()">Buscar hábito</button>
+      </div>
+
+      <div>
+        <input type="text" id="nuevoHabitoNombre" placeholder="Nombre del hábito">
+        <select id="nuevoHabitoDificultad">
+          <option value="Fácil">Fácil</option>
+          <option value="Medio">Medio</option>
+          <option value="Difícil">Difícil</option>
+        </select>
+        <button onclick="crearHabito()">Agregar hábito</button>
+      </div>
+
+      <div>
+        <input type="number" id="actualizarHabitoId" placeholder="ID">
+        <input type="text" id="actualizarHabitoNombre" placeholder="Nuevo nombre">
+        <select id="actualizarHabitoDificultad">
+          <option value="Fácil">Fácil</option>
+          <option value="Medio">Medio</option>
+          <option value="Difícil">Difícil</option>
+        </select>
+        <button onclick="actualizarHabito()">Actualizar hábito</button>
+      </div>
+
+      <div>
+        <input type="number" id="eliminarHabitoId" placeholder="ID a eliminar">
+        <button onclick="eliminarHabito()">Eliminar hábito</button>
+      </div>
+    </div>
+
+    <div id="resultado" class="resultado"></div>
+  </main>
+
+  <script src="menu.js"></script>
+  <script>
+    const api = 'http://localhost:3000/habitos';
+
+    function mostrarResultado(data) {
+      document.getElementById('resultado').textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function getAllHabitos() {
+      const res = await fetch(api);
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function buscarHabito() {
+      const id = document.getElementById('buscarHabitoId').value;
+      const res = await fetch(`${api}/${id}`);
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function crearHabito() {
+      const nombre = document.getElementById('nuevoHabitoNombre').value;
+      const dificultad = document.getElementById('nuevoHabitoDificultad').value;
+
+      const res = await fetch(api, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, dificultad })
+      });
+
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function actualizarHabito() {
+      const id = document.getElementById('actualizarHabitoId').value;
+      const nombre = document.getElementById('actualizarHabitoNombre').value;
+      const dificultad = document.getElementById('actualizarHabitoDificultad').value;
+
+      const res = await fetch(`${api}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, dificultad })
+      });
+
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function eliminarHabito() {
+      const id = document.getElementById('eliminarHabitoId').value;
+      const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+  </script>
+</body>
+</html>

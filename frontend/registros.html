@@ -1,0 +1,109 @@
+<!-- registros.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Hábitos - FitBrAD</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Registro de Hábitos</h1>
+    <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+    <nav id="menu" class="hidden">
+      <a href="index.html">Inicio</a>
+      <a href="usuarios.html">Usuarios</a>
+      <a href="habitos.html">Hábitos</a>
+      <a href="retos.html">Retos</a>
+      <a href="registros.html">Registro de Hábitos</a>
+      <a href="participaciones.html">Participaciones</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="buttons">
+      <div>
+        <input type="number" id="usuarioRegistroId" placeholder="ID del usuario">
+        <button onclick="obtenerRegistrosPorUsuario()">Ver registros del usuario</button>
+      </div>
+
+      <div>
+        <input type="number" id="registroUsuarioId" placeholder="ID del usuario">
+        <input type="number" id="registroHabitoId" placeholder="ID del hábito">
+        <input type="number" id="registroDias" placeholder="Días consecutivos">
+        <input type="number" id="registroMeta" placeholder="Meta">
+        <button onclick="crearRegistroHabito()">Agregar registro</button>
+      </div>
+
+      <div>
+        <input type="number" id="actualizarRegistroId" placeholder="ID del registro">
+        <input type="number" id="nuevosDias" placeholder="Nuevos días consecutivos">
+        <input type="number" id="nuevaMeta" placeholder="Nueva meta">
+        <button onclick="actualizarRegistroHabito()">Actualizar registro</button>
+      </div>
+
+      <div>
+        <input type="number" id="eliminarRegistroId" placeholder="ID del registro">
+        <button onclick="eliminarRegistroHabito()">Eliminar registro</button>
+      </div>
+    </div>
+
+    <div id="resultado" class="resultado"></div>
+  </main>
+
+  <script src="menu.js"></script>
+  <script>
+    const api = 'http://localhost:3000/registros-habitos';
+
+    function mostrarResultado(data) {
+      document.getElementById('resultado').textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function obtenerRegistrosPorUsuario() {
+      const usuarioId = document.getElementById('usuarioRegistroId').value;
+      const res = await fetch(`${api}/usuario/${usuarioId}`);
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function crearRegistroHabito() {
+      const usuarioId = document.getElementById('registroUsuarioId').value;
+      const habitoId = document.getElementById('registroHabitoId').value;
+      const dias = parseInt(document.getElementById('registroDias').value);
+      const meta = parseInt(document.getElementById('registroMeta').value);
+
+      const res = await fetch(api, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuarioId, habitoId, progreso: { dias_consecutivos: dias, meta } })
+      });
+
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function actualizarRegistroHabito() {
+      const id = document.getElementById('actualizarRegistroId').value;
+      const dias = parseInt(document.getElementById('nuevosDias').value);
+      const meta = parseInt(document.getElementById('nuevaMeta').value);
+
+      const res = await fetch(`${api}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ progreso: { dias_consecutivos: dias, meta } })
+      });
+
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function eliminarRegistroHabito() {
+      const id = document.getElementById('eliminarRegistroId').value;
+      const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+  </script>
+</body>
+</html>
