@@ -1,0 +1,73 @@
+<!-- vistas.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vistas - FitBrAD</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Vistas</h1>
+    <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+    <nav id="menu" class="hidden">
+      <a href="index.html">Inicio</a>
+      <a href="usuarios.html">Usuarios</a>
+      <a href="habitos.html">Hábitos</a>
+      <a href="retos.html">Retos</a>
+      <a href="registros.html">Registro de Hábitos</a>
+      <a href="participaciones.html">Participaciones</a>
+      <a href="vistas.html">Vistas</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="buttons">
+      <button onclick="verVistaRegistros()">Vista: Registro de Hábitos</button>
+      <button onclick="verVistaParticipaciones()">Vista: Participación en Retos</button>
+    </div>
+
+    <div id="resultado" class="resultado"></div>
+  </main>
+
+  <script src="menu.js"></script>
+  <script>
+    async function verVistaRegistros() {
+      const res = await fetch('http://127.0.0.1:3000/vistas/registro-habitos');
+      const data = await res.json();
+      renderTabla(data);
+    }
+
+    async function verVistaParticipaciones() {
+      const res = await fetch('http://127.0.0.1:3000/vistas/participacion-retos');
+      const data = await res.json();
+      renderTabla(data);
+    }
+
+    function renderTabla(data) {
+      if (!Array.isArray(data) || data.length === 0) {
+        document.getElementById('resultado').textContent = 'Sin resultados disponibles';
+        return;
+      }
+
+      const keys = Object.keys(data[0]);
+      let html = '<table><thead><tr>';
+      keys.forEach(k => html += `<th>${k}</th>`);
+      html += '</tr></thead><tbody>';
+
+      data.forEach(row => {
+        html += '<tr>';
+        keys.forEach(k => {
+          const valor = typeof row[k] === 'object' ? JSON.stringify(row[k]) : row[k];
+          html += `<td>${valor}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      document.getElementById('resultado').innerHTML = html;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!-- participaciones.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Participaciones - FitBrAD</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Participaciones en Retos</h1>
+    <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+    <nav id="menu" class="hidden">
+      <a href="index.html">Inicio</a>
+      <a href="usuarios.html">Usuarios</a>
+      <a href="habitos.html">Hábitos</a>
+      <a href="retos.html">Retos</a>
+      <a href="registros.html">Registro de Hábitos</a>
+      <a href="participaciones.html">Participaciones</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="buttons">
+      <div>
+        <input type="number" id="retoIdParticipaciones" placeholder="ID del reto">
+        <button onclick="obtenerParticipacionesPorReto()">Ver participantes</button>
+      </div>
+
+      <div>
+        <input type="number" id="nuevoUsuarioId" placeholder="ID del usuario">
+        <input type="number" id="nuevoRetoId" placeholder="ID del reto">
+        <button onclick="unirseAReto()">Unirse a reto</button>
+      </div>
+
+      <div>
+        <input type="number" id="completarParticipacionId" placeholder="ID de participación">
+        <button onclick="marcarComoCompletado()">Marcar como completado</button>
+      </div>
+
+      <div>
+        <input type="number" id="eliminarParticipacionId" placeholder="ID de participación">
+        <button onclick="abandonarReto()">Abandonar reto</button>
+      </div>
+    </div>
+
+    <div id="resultado" class="resultado"></div>
+  </main>
+
+  <script src="menu.js"></script>
+  <script>
+    const api = 'http://localhost:3000/participaciones';
+
+    function mostrarResultado(data) {
+      document.getElementById('resultado').textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function obtenerParticipacionesPorReto() {
+      const retoId = document.getElementById('retoIdParticipaciones').value;
+      const res = await fetch(`${api}/reto/${retoId}`);
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function unirseAReto() {
+      const usuarioId = document.getElementById('nuevoUsuarioId').value;
+      const retoId = document.getElementById('nuevoRetoId').value;
+
+      const res = await fetch(api, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuarioId, retoId })
+      });
+
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function marcarComoCompletado() {
+      const id = document.getElementById('completarParticipacionId').value;
+
+      const res = await fetch(`${api}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completado: true })
+      });
+
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+
+    async function abandonarReto() {
+      const id = document.getElementById('eliminarParticipacionId').value;
+      const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      mostrarResultado(data);
+    }
+  </script>
+</body>
+</html>
