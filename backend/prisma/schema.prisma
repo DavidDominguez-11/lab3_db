@@ -15,7 +15,6 @@ enum TipoDificultad {
   Dificil
 }
 
-// tabla Usuario
 model Usuario {
   id              Int                 @id @default(autoincrement())
   nombre          String              @db.VarChar(100)
@@ -23,6 +22,8 @@ model Usuario {
   fecha_registro  DateTime            @default(now())
   registrosHabito RegistroHabito[]
   participaciones ParticipacionReto[]
+
+  @@map("usuario")  // Mapea a tabla 'usuario'
 }
 
 model Habito {
@@ -30,6 +31,8 @@ model Habito {
   nombre          String           @db.VarChar(50)
   dificultad      TipoDificultad
   registrosHabito RegistroHabito[]
+
+  @@map("habito")  // Mapea a tabla 'habito'
 }
 
 model RegistroHabito {
@@ -39,7 +42,9 @@ model RegistroHabito {
   habito    Habito   @relation(fields: [habitoId], references: [id])
   habitoId  Int
   fecha     DateTime @default(now())
-  progreso  Json? // Ejemplo del json { "dias_consecutivos": 5, "meta": 30 }
+  progreso  Json?
+
+  @@map("registrohabito")  // Mapea a tabla 'registrohabito'
 }
 
 model Reto {
@@ -48,6 +53,8 @@ model Reto {
   fecha_inicio    DateTime
   fecha_fin       DateTime
   participaciones ParticipacionReto[]
+
+  @@map("reto")  // Mapea a tabla 'reto'
 }
 
 model ParticipacionReto {
@@ -57,4 +64,6 @@ model ParticipacionReto {
   reto       Reto    @relation(fields: [retoId], references: [id])
   retoId     Int
   completado Boolean @default(false)
+
+  @@map("participacionreto")  // Mapea a tabla 'participacionreto'
 }
