@@ -103,20 +103,16 @@ exports.eliminarHabito = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const registros = await prisma.registroHabito.findMany({
+    // Eliminar registros asociados
+    await prisma.registroHabito.deleteMany({
       where: { habitoId: Number(id) },
     });
 
-    if (registros.length > 0) {
-      return res.status(400).json({
-        error: 'No se puede eliminar el hábito',
-        detalles: 'Existen registros asociados a este hábito'
-      });
-    }
-
+    // Eliminar hábito
     await prisma.habito.delete({
       where: { id: Number(id) },
     });
+
     res.status(204).end();
   } catch (error) {
     res.status(500).json({ error: 'Error al eliminar hábito', detalles: error.message });
