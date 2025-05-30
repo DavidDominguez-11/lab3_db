@@ -11,7 +11,8 @@ const habitoRoutes = require('./src/routes/habito.routes');
 // rutas tablas de cruce
 const registroHabitoRoutes = require('./src/routes/registroHabito.routes');
 const participacionRetoRoutes = require('./src/routes/participacionReto.routes');
-
+// rutas vistas
+const vistasRoutes = require('./src/routes/vistas.routes');
 
 // Rutas para usuarios
 app.use('/usuarios', usuarioRoutes);
@@ -25,6 +26,9 @@ app.use('/habitos', habitoRoutes);
 // rutas tablas de cruce
 app.use('/registros-habitos', registroHabitoRoutes);
 app.use('/participaciones', participacionRetoRoutes);
+
+// rutas para las vistas
+app.use('/vistas', vistasRoutes);
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`App listening on port ${port}`);
