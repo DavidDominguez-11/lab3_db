@@ -1,3 +1,34 @@
+## Instalación y Ejecución
+
+1. Clonar el repositorio:
+```bash
+git clone https://github.com/DavidDominguez-11/lab3_db.git
+```
+
+2. Entrar al directorio del proyecto y levantar los contenedores:
+```bash
+cd lab3_db
+docker-compose up --build
+```
+
+3. Configurar la base de datos y llenar datos iniciales:
+```bash
+cd backend
+npx prisma migrate dev --name init 
+npm run seed
+npm start
+```
+
+4. Abrir en el navegador (recomendado Google Chrome):
+```
+http://localhost:8080
+```
+
+5. Para detener la aplicación:
+- Donde corre el backend: `Ctrl + C`  
+
+- Donde corre docker compose: `Ctrl + C`
+- Donde corre docker compose: `docker-compose down`
 
 ## Endpoints
 
