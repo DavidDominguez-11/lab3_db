@@ -113,7 +113,10 @@ exports.eliminarHabito = async (req, res) => {
       where: { id: Number(id) },
     });
 
-    res.status(204).end();
+    res.status(200).json({
+      mensaje: 'Hábito eliminado correctamente',
+      habitoEliminado: habitoAEliminar
+    });
   } catch (error) {
     res.status(500).json({ error: 'Error al eliminar hábito', detalles: error.message });
   }

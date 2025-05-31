@@ -45,7 +45,7 @@
 
   <script src="menu.js"></script>
   <script>
-    const api = 'http://localhost:3000/registros';
+    const api = 'http://localhost:3000/registros-habitos';
 
     function mostrarResultado(data) {
       const resultadoDiv = document.getElementById('resultado');
@@ -135,7 +135,9 @@
         const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('No se pudo eliminar el registro');
         const data = await res.json();
-        mostrarResultado(data);
+        mostrarResultado({
+          mensaje: 'Registro eliminado correctamente'
+        });
       } catch (error) {
         document.getElementById('resultado').textContent = error.message;
       }

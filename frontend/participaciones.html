@@ -131,22 +131,28 @@
     }
 
     async function marcarComoCompletado() {
-      const participacionId = document.getElementById('completarParticipacionId').value;
-      if (!participacionId) {
-        alert('Por favor ingresa un ID de participación');
-        return;
-      }
-      try {
-        const res = await fetch(`${api}/${participacionId}/completar`, {
-          method: 'PUT',
-        });
-        if (!res.ok) throw new Error('No se pudo marcar como completado');
-        const data = await res.json();
-        mostrarResultado(data);
-      } catch (error) {
-        document.getElementById('resultado').textContent = error.message;
-      }
-    }
+  const participacionId = document.getElementById('completarParticipacionId').value;
+  if (!participacionId) {
+    alert('Por favor ingresa un ID de participación');
+    return;
+  }
+  try {
+    const res = await fetch(`${api}/${participacionId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json' // Especificamos que enviamos JSON
+      },
+      body: JSON.stringify({ // Convertimos el objeto a JSON
+        completado: true 
+      })
+    });
+    if (!res.ok) throw new Error('No se pudo marcar como completado');
+    const data = await res.json();
+    mostrarResultado(data);
+  } catch (error) {
+    document.getElementById('resultado').textContent = error.message;
+  }
+}
 
     async function abandonarReto() {
       const participacionId = document.getElementById('eliminarParticipacionId').value;
@@ -155,10 +161,18 @@
         return;
       }
       try {
-        const res = await fetch(`${api}/${participacionId}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('No se pudo abandonar el reto');
-        const data = await res.json();
-        mostrarResultado(data);
+        const res = await fetch(`${api}/${participacionId}`, { 
+          method: 'DELETE' 
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.text(); // Leer respuesta como texto primero
+          throw new Error(errorData || 'No se pudo abandonar el reto');
+        }
+        
+        // Mostrar "Borrado" sin intentar parsear JSON
+        document.getElementById('resultado').textContent = "Borrado";
+        
       } catch (error) {
         document.getElementById('resultado').textContent = error.message;
       }

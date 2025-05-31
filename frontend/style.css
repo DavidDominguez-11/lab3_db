@@ -261,7 +261,6 @@ input:focus, select:focus {
 
 /* Etiqueta "Resultado" */
 #resultado::before {
-  content: 'Resultado';
   position: absolute;
   top: -0.75rem;
   left: 1rem;
@@ -555,7 +554,6 @@ input:focus, select:focus {
 }
 
 .resultado::before {
-  content: 'Resultado';
   position: absolute;
   top: 10rem; 
   left: 1rem;

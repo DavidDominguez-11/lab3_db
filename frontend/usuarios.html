@@ -135,12 +135,16 @@
         const res = await fetch(api, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nombre, email }),
+          body: JSON.stringify({ 
+            nombre, 
+            email,
+            habitos: []
+          }),
         });
         const data = await res.json();
         mostrarResultado(data);
       } catch (error) {
-        document.getElementById('resultado').textContent = 'Error al crear usuario';
+        document.getElementById('resultado').textContent = 'Error al crear usuario: ' + error.message;
       }
     }
 
@@ -180,8 +184,6 @@
       try {
         const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('No se pudo eliminar el usuario');
-        const data = await res.json();
-        mostrarResultado(data);
       } catch (error) {
         document.getElementById('resultado').textContent = error.message;
       }
