@@ -18,6 +18,7 @@
       <a href="retos.html">Retos</a>
       <a href="registros.html">Registro de Hábitos</a>
       <a href="participaciones.html">Participaciones</a>
+      <a href="vistas.html">Vistas</a>
     </nav>
   </header>
 
@@ -33,9 +34,9 @@
       <div>
         <input type="text" id="nuevoHabitoNombre" placeholder="Nombre del hábito" />
         <select id="nuevoHabitoDificultad">
-          <option value="Fácil">Fácil</option>
+          <option value="Facil">Fácil</option>
           <option value="Medio">Medio</option>
-          <option value="Difícil">Difícil</option>
+          <option value="Dificil">Difícil</option>
         </select>
         <button onclick="crearHabito()">Agregar hábito</button>
       </div>
@@ -44,9 +45,9 @@
         <input type="number" id="actualizarHabitoId" placeholder="ID" />
         <input type="text" id="actualizarHabitoNombre" placeholder="Nuevo nombre" />
         <select id="actualizarHabitoDificultad">
-          <option value="Fácil">Fácil</option>
+          <option value="Facil">Fácil</option>
           <option value="Medio">Medio</option>
-          <option value="Difícil">Difícil</option>
+          <option value="Dificil">Difícil</option>
         </select>
         <button onclick="actualizarHabito()">Actualizar hábito</button>
       </div>
@@ -187,7 +188,7 @@
       }
       try {
         const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('No se pudo eliminar el hábito');
+        if (!res.ok) throw new Error('Hábito eliminado');
         const data = await res.json();
         mostrarResultado(data);
       } catch (error) {

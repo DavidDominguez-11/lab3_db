@@ -54,5 +54,7 @@ exports.actualizarRegistro = async (req, res) => {
 exports.eliminarRegistro = async (req, res) => {
   const { id } = req.params;
   await prisma.registroHabito.delete({ where: { id: Number(id) } });
-  res.status(204).end();
+  res.status(204).json({
+    mensaje: 'Registro eliminado correctamente'
+  });
 };

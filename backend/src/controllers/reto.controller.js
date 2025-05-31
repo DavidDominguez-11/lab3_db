@@ -120,7 +120,9 @@ exports.eliminarReto = async (req, res) => {
       where: { id: Number(id) }
     });
     
-    res.status(204).end();
+    res.status(204).json({
+      mensaje: 'Registro eliminado correctamente'
+    });
   } catch (error) {
     console.error(error);
     if (error.code === 'P2025') {

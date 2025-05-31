@@ -53,5 +53,7 @@ exports.marcarCompletado = async (req, res) => {
 exports.abandonarReto = async (req, res) => {
   const { id } = req.params;
   await prisma.participacionReto.delete({ where: { id: Number(id) } });
-  res.status(204).end();
+  res.status(204).json({
+    mensaje: 'Participación eliminada correctamente'
+  });
 };
