@@ -1,6 +1,27 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const port = 3000;
+
+// Config de CORS 
+const corsOptions = {
+  origin: [
+    'http://localhost:8080',
+    'http://0.0.0.0:8080',
+    '*'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'Accept'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
