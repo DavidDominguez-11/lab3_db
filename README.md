@@ -1,3 +1,13 @@
+## Requisitos
+
+Antes de comenzar, asegúrate de tener instalado en tu sistema:
+
+- [Git](https://git-scm.com/)
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Node.js](https://nodejs.org/)
+- [npm](https://www.npmjs.com/)
+
 ## Instalación y Ejecución
 
 1. Clonar el repositorio:
