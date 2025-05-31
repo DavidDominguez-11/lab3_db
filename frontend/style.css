@@ -557,16 +557,16 @@ input:focus, select:focus {
 .resultado::before {
   content: 'Resultado';
   position: absolute;
-  top: -0.75rem; /* Más arriba para que no cubra el contenido */
+  top: 10rem; 
   left: 1rem;
   background: var(--primary-color);
   color: white;
-  padding: 0.375rem 0.875rem; /* Padding más generoso */
+  padding: 0.375rem 0.875rem; 
   border-radius: var(--radius);
   font-size: 0.75rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
-  z-index: 10; /* Asegurar que esté por encima */
+  z-index: 10;
   box-shadow: var(--shadow-sm);
 }
 

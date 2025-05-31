@@ -26,25 +26,25 @@
       <button onclick="getAllUsuarios()">Obtener todos los usuarios</button>
 
       <div>
-        <input type="number" id="buscarUsuarioId" placeholder="ID de usuario">
+        <input type="number" id="buscarUsuarioId" placeholder="ID de usuario" />
         <button onclick="buscarUsuario()">Buscar usuario</button>
       </div>
 
       <div>
-        <input type="text" id="nuevoNombre" placeholder="Nombre">
-        <input type="email" id="nuevoEmail" placeholder="Email">
+        <input type="text" id="nuevoNombre" placeholder="Nombre" />
+        <input type="email" id="nuevoEmail" placeholder="Email" />
         <button onclick="crearUsuario()">Agregar usuario</button>
       </div>
 
       <div>
-        <input type="number" id="actualizarId" placeholder="ID">
-        <input type="text" id="actualizarNombre" placeholder="Nuevo nombre">
-        <input type="email" id="actualizarEmail" placeholder="Nuevo email">
+        <input type="number" id="actualizarId" placeholder="ID" />
+        <input type="text" id="actualizarNombre" placeholder="Nuevo nombre" />
+        <input type="email" id="actualizarEmail" placeholder="Nuevo email" />
         <button onclick="actualizarUsuario()">Actualizar usuario</button>
       </div>
 
       <div>
-        <input type="number" id="eliminarId" placeholder="ID a eliminar">
+        <input type="number" id="eliminarId" placeholder="ID a eliminar" />
         <button onclick="eliminarUsuario()">Eliminar usuario</button>
       </div>
     </div>
@@ -57,56 +57,134 @@
     const api = 'http://localhost:3000/usuarios';
 
     function mostrarResultado(data) {
-      document.getElementById('resultado').textContent = JSON.stringify(data, null, 2);
+      const resultadoDiv = document.getElementById('resultado');
+
+      if (!data) {
+        resultadoDiv.textContent = 'No hay datos para mostrar';
+        return;
+      }
+
+      const arrayData = Array.isArray(data) ? data : [data];
+
+      if (arrayData.length === 0) {
+        resultadoDiv.textContent = 'No hay registros para mostrar';
+        return;
+      }
+
+      const keys = Object.keys(arrayData[0]);
+      let html = '<table><thead><tr>';
+
+      keys.forEach(k => {
+        html += `<th>${k}</th>`;
+      });
+
+      html += '</tr></thead><tbody>';
+
+      arrayData.forEach(row => {
+        html += '<tr>';
+        keys.forEach(k => {
+          const valor = row[k] === null || row[k] === undefined
+            ? ''
+            : (typeof row[k] === 'object' ? JSON.stringify(row[k]) : row[k]);
+          html += `<td>${valor}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+
+      resultadoDiv.innerHTML = html;
     }
 
     async function getAllUsuarios() {
-      const res = await fetch(api);
-      const data = await res.json();
-      mostrarResultado(data);
+      try {
+        const res = await fetch(api);
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = 'Error al obtener usuarios';
+      }
     }
 
     async function buscarUsuario() {
       const id = document.getElementById('buscarUsuarioId').value;
-      const res = await fetch(`${api}/${id}`);
-      const data = await res.json();
-      mostrarResultado(data);
+      if (!id) {
+        alert('Por favor ingresa un ID');
+        return;
+      }
+      try {
+        const res = await fetch(`${api}/${id}`);
+        if (!res.ok) throw new Error('Usuario no encontrado');
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = error.message;
+      }
     }
 
     async function crearUsuario() {
-      const nombre = document.getElementById('nuevoNombre').value;
-      const email = document.getElementById('nuevoEmail').value;
+      const nombre = document.getElementById('nuevoNombre').value.trim();
+      const email = document.getElementById('nuevoEmail').value.trim();
 
-      const res = await fetch(api, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, email })
-      });
+      if (!nombre || !email) {
+        alert('Por favor ingresa nombre y email');
+        return;
+      }
 
-      const data = await res.json();
-      mostrarResultado(data);
+      try {
+        const res = await fetch(api, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, email }),
+        });
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = 'Error al crear usuario';
+      }
     }
 
     async function actualizarUsuario() {
       const id = document.getElementById('actualizarId').value;
-      const nombre = document.getElementById('actualizarNombre').value;
-      const email = document.getElementById('actualizarEmail').value;
+      const nombre = document.getElementById('actualizarNombre').value.trim();
+      const email = document.getElementById('actualizarEmail').value.trim();
 
-      const res = await fetch(`${api}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, email })
-      });
+      if (!id || (!nombre && !email)) {
+        alert('Por favor ingresa ID y al menos un campo a actualizar');
+        return;
+      }
 
-      const data = await res.json();
-      mostrarResultado(data);
+      try {
+        const bodyData = {};
+        if (nombre) bodyData.nombre = nombre;
+        if (email) bodyData.email = email;
+
+        const res = await fetch(`${api}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyData),
+        });
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = 'Error al actualizar usuario';
+      }
     }
 
     async function eliminarUsuario() {
       const id = document.getElementById('eliminarId').value;
-      const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      mostrarResultado(data);
+      if (!id) {
+        alert('Por favor ingresa un ID para eliminar');
+        return;
+      }
+      try {
+        const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('No se pudo eliminar el usuario');
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = error.message;
+      }
     }
   </script>
 </body>

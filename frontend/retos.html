@@ -26,26 +26,26 @@
       <button onclick="getAllRetos()">Obtener todos los retos</button>
 
       <div>
-        <input type="number" id="buscarRetoId" placeholder="ID del reto">
+        <input type="number" id="buscarRetoId" placeholder="ID del reto" />
         <button onclick="buscarReto()">Buscar reto</button>
       </div>
 
       <div>
-        <input type="text" id="nuevoRetoNombre" placeholder="Nombre del reto">
-        <input type="date" id="nuevoRetoInicio">
-        <input type="date" id="nuevoRetoFin">
+        <input type="text" id="nuevoRetoNombre" placeholder="Nombre del reto" />
+        <input type="date" id="nuevoRetoInicio" />
+        <input type="date" id="nuevoRetoFin" />
         <button onclick="crearReto()">Agregar reto</button>
       </div>
 
       <div>
-        <input type="number" id="actualizarRetoId" placeholder="ID">
-        <input type="text" id="actualizarRetoNombre" placeholder="Nuevo nombre">
-        <input type="date" id="actualizarRetoFin">
+        <input type="number" id="actualizarRetoId" placeholder="ID" />
+        <input type="text" id="actualizarRetoNombre" placeholder="Nuevo nombre" />
+        <input type="date" id="actualizarRetoFin" />
         <button onclick="actualizarReto()">Actualizar reto</button>
       </div>
 
       <div>
-        <input type="number" id="eliminarRetoId" placeholder="ID a eliminar">
+        <input type="number" id="eliminarRetoId" placeholder="ID a eliminar" />
         <button onclick="eliminarReto()">Eliminar reto</button>
       </div>
     </div>
@@ -58,57 +58,135 @@
     const api = 'http://localhost:3000/retos';
 
     function mostrarResultado(data) {
-      document.getElementById('resultado').textContent = JSON.stringify(data, null, 2);
+      const resultadoDiv = document.getElementById('resultado');
+
+      if (!data) {
+        resultadoDiv.textContent = 'No hay datos para mostrar';
+        return;
+      }
+
+      const arrayData = Array.isArray(data) ? data : [data];
+
+      if (arrayData.length === 0) {
+        resultadoDiv.textContent = 'No hay registros para mostrar';
+        return;
+      }
+
+      const keys = Object.keys(arrayData[0]);
+      let html = '<table><thead><tr>';
+
+      keys.forEach(k => {
+        html += `<th>${k}</th>`;
+      });
+
+      html += '</tr></thead><tbody>';
+
+      arrayData.forEach(row => {
+        html += '<tr>';
+        keys.forEach(k => {
+          const valor = row[k] === null || row[k] === undefined
+            ? ''
+            : (typeof row[k] === 'object' ? JSON.stringify(row[k]) : row[k]);
+          html += `<td>${valor}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+
+      resultadoDiv.innerHTML = html;
     }
 
     async function getAllRetos() {
-      const res = await fetch(api);
-      const data = await res.json();
-      mostrarResultado(data);
+      try {
+        const res = await fetch(api);
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = 'Error al obtener retos';
+      }
     }
 
     async function buscarReto() {
       const id = document.getElementById('buscarRetoId').value;
-      const res = await fetch(`${api}/${id}`);
-      const data = await res.json();
-      mostrarResultado(data);
+      if (!id) {
+        alert('Por favor ingresa un ID');
+        return;
+      }
+      try {
+        const res = await fetch(`${api}/${id}`);
+        if (!res.ok) throw new Error('Reto no encontrado');
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = error.message;
+      }
     }
 
     async function crearReto() {
-      const nombre = document.getElementById('nuevoRetoNombre').value;
+      const nombre = document.getElementById('nuevoRetoNombre').value.trim();
       const fecha_inicio = document.getElementById('nuevoRetoInicio').value;
       const fecha_fin = document.getElementById('nuevoRetoFin').value;
 
-      const res = await fetch(api, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, fecha_inicio, fecha_fin })
-      });
+      if (!nombre || !fecha_inicio || !fecha_fin) {
+        alert('Por favor completa todos los campos');
+        return;
+      }
 
-      const data = await res.json();
-      mostrarResultado(data);
+      try {
+        const res = await fetch(api, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, fecha_inicio, fecha_fin }),
+        });
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = 'Error al crear reto';
+      }
     }
 
     async function actualizarReto() {
       const id = document.getElementById('actualizarRetoId').value;
-      const nombre = document.getElementById('actualizarRetoNombre').value;
+      const nombre = document.getElementById('actualizarRetoNombre').value.trim();
       const fecha_fin = document.getElementById('actualizarRetoFin').value;
 
-      const res = await fetch(`${api}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, fecha_fin })
-      });
+      if (!id || (!nombre && !fecha_fin)) {
+        alert('Por favor ingresa ID y al menos un campo a actualizar');
+        return;
+      }
 
-      const data = await res.json();
-      mostrarResultado(data);
+      try {
+        const bodyData = {};
+        if (nombre) bodyData.nombre = nombre;
+        if (fecha_fin) bodyData.fecha_fin = fecha_fin;
+
+        const res = await fetch(`${api}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyData),
+        });
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = 'Error al actualizar reto';
+      }
     }
 
     async function eliminarReto() {
       const id = document.getElementById('eliminarRetoId').value;
-      const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      mostrarResultado(data);
+      if (!id) {
+        alert('Por favor ingresa un ID para eliminar');
+        return;
+      }
+      try {
+        const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('No se pudo eliminar el reto');
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = error.message;
+      }
     }
   </script>
 </body>

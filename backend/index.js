@@ -8,6 +8,8 @@ const corsOptions = {
   origin: [
     'http://localhost:8080',
     'http://0.0.0.0:8080',
+    'http://localhost:5500',
+    'http://0.0.0.0:5500',
     '*'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

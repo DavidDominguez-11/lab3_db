@@ -26,12 +26,12 @@
       <button onclick="getAllHabitos()">Obtener todos los hábitos</button>
 
       <div>
-        <input type="number" id="buscarHabitoId" placeholder="ID del hábito">
+        <input type="number" id="buscarHabitoId" placeholder="ID del hábito" />
         <button onclick="buscarHabito()">Buscar hábito</button>
       </div>
 
       <div>
-        <input type="text" id="nuevoHabitoNombre" placeholder="Nombre del hábito">
+        <input type="text" id="nuevoHabitoNombre" placeholder="Nombre del hábito" />
         <select id="nuevoHabitoDificultad">
           <option value="Fácil">Fácil</option>
           <option value="Medio">Medio</option>
@@ -41,8 +41,8 @@
       </div>
 
       <div>
-        <input type="number" id="actualizarHabitoId" placeholder="ID">
-        <input type="text" id="actualizarHabitoNombre" placeholder="Nuevo nombre">
+        <input type="number" id="actualizarHabitoId" placeholder="ID" />
+        <input type="text" id="actualizarHabitoNombre" placeholder="Nuevo nombre" />
         <select id="actualizarHabitoDificultad">
           <option value="Fácil">Fácil</option>
           <option value="Medio">Medio</option>
@@ -52,7 +52,7 @@
       </div>
 
       <div>
-        <input type="number" id="eliminarHabitoId" placeholder="ID a eliminar">
+        <input type="number" id="eliminarHabitoId" placeholder="ID a eliminar" />
         <button onclick="eliminarHabito()">Eliminar hábito</button>
       </div>
     </div>
@@ -65,56 +65,134 @@
     const api = 'http://localhost:3000/habitos';
 
     function mostrarResultado(data) {
-      document.getElementById('resultado').textContent = JSON.stringify(data, null, 2);
+      const resultadoDiv = document.getElementById('resultado');
+
+      if (!data) {
+        resultadoDiv.textContent = 'No hay datos para mostrar';
+        return;
+      }
+
+      const arrayData = Array.isArray(data) ? data : [data];
+
+      if (arrayData.length === 0) {
+        resultadoDiv.textContent = 'No hay registros para mostrar';
+        return;
+      }
+
+      const keys = Object.keys(arrayData[0]);
+      let html = '<table><thead><tr>';
+
+      keys.forEach(k => {
+        html += `<th>${k}</th>`;
+      });
+
+      html += '</tr></thead><tbody>';
+
+      arrayData.forEach(row => {
+        html += '<tr>';
+        keys.forEach(k => {
+          const valor = row[k] === null || row[k] === undefined
+            ? ''
+            : (typeof row[k] === 'object' ? JSON.stringify(row[k]) : row[k]);
+          html += `<td>${valor}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+
+      resultadoDiv.innerHTML = html;
     }
 
     async function getAllHabitos() {
-      const res = await fetch(api);
-      const data = await res.json();
-      mostrarResultado(data);
+      try {
+        const res = await fetch(api);
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch {
+        document.getElementById('resultado').textContent = 'Error al obtener hábitos';
+      }
     }
 
     async function buscarHabito() {
       const id = document.getElementById('buscarHabitoId').value;
-      const res = await fetch(`${api}/${id}`);
-      const data = await res.json();
-      mostrarResultado(data);
+      if (!id) {
+        alert('Por favor ingresa un ID');
+        return;
+      }
+      try {
+        const res = await fetch(`${api}/${id}`);
+        if (!res.ok) throw new Error('Hábito no encontrado');
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = error.message;
+      }
     }
 
     async function crearHabito() {
-      const nombre = document.getElementById('nuevoHabitoNombre').value;
+      const nombre = document.getElementById('nuevoHabitoNombre').value.trim();
       const dificultad = document.getElementById('nuevoHabitoDificultad').value;
 
-      const res = await fetch(api, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, dificultad })
-      });
+      if (!nombre || !dificultad) {
+        alert('Por favor completa todos los campos');
+        return;
+      }
 
-      const data = await res.json();
-      mostrarResultado(data);
+      try {
+        const res = await fetch(api, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, dificultad }),
+        });
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch {
+        document.getElementById('resultado').textContent = 'Error al crear hábito';
+      }
     }
 
     async function actualizarHabito() {
       const id = document.getElementById('actualizarHabitoId').value;
-      const nombre = document.getElementById('actualizarHabitoNombre').value;
+      const nombre = document.getElementById('actualizarHabitoNombre').value.trim();
       const dificultad = document.getElementById('actualizarHabitoDificultad').value;
 
-      const res = await fetch(`${api}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, dificultad })
-      });
+      if (!id || (!nombre && !dificultad)) {
+        alert('Por favor ingresa ID y al menos un campo a actualizar');
+        return;
+      }
 
-      const data = await res.json();
-      mostrarResultado(data);
+      try {
+        const bodyData = {};
+        if (nombre) bodyData.nombre = nombre;
+        if (dificultad) bodyData.dificultad = dificultad;
+
+        const res = await fetch(`${api}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyData),
+        });
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch {
+        document.getElementById('resultado').textContent = 'Error al actualizar hábito';
+      }
     }
 
     async function eliminarHabito() {
       const id = document.getElementById('eliminarHabitoId').value;
-      const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      mostrarResultado(data);
+      if (!id) {
+        alert('Por favor ingresa un ID para eliminar');
+        return;
+      }
+      try {
+        const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('No se pudo eliminar el hábito');
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = error.message;
+      }
     }
   </script>
 </body>

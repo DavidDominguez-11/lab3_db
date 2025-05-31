@@ -24,28 +24,19 @@
   <main>
     <div class="buttons">
       <div>
-        <input type="number" id="usuarioRegistroId" placeholder="ID del usuario">
-        <button onclick="obtenerRegistrosPorUsuario()">Ver registros del usuario</button>
+        <input type="number" id="usuarioIdRegistro" placeholder="ID del usuario" />
+        <button onclick="obtenerRegistrosPorUsuario()">Ver registros</button>
       </div>
 
       <div>
-        <input type="number" id="registroUsuarioId" placeholder="ID del usuario">
-        <input type="number" id="registroHabitoId" placeholder="ID del hábito">
-        <input type="number" id="registroDias" placeholder="Días consecutivos">
-        <input type="number" id="registroMeta" placeholder="Meta">
-        <button onclick="crearRegistroHabito()">Agregar registro</button>
+        <input type="number" id="nuevoUsuarioIdRegistro" placeholder="ID usuario" />
+        <input type="number" id="nuevoHabitoIdRegistro" placeholder="ID hábito" />
+        <button onclick="crearRegistro()">Agregar registro</button>
       </div>
 
       <div>
-        <input type="number" id="actualizarRegistroId" placeholder="ID del registro">
-        <input type="number" id="nuevosDias" placeholder="Nuevos días consecutivos">
-        <input type="number" id="nuevaMeta" placeholder="Nueva meta">
-        <button onclick="actualizarRegistroHabito()">Actualizar registro</button>
-      </div>
-
-      <div>
-        <input type="number" id="eliminarRegistroId" placeholder="ID del registro">
-        <button onclick="eliminarRegistroHabito()">Eliminar registro</button>
+        <input type="number" id="eliminarRegistroId" placeholder="ID de registro" />
+        <button onclick="eliminarRegistro()">Eliminar registro</button>
       </div>
     </div>
 
@@ -54,55 +45,100 @@
 
   <script src="menu.js"></script>
   <script>
-    const api = 'http://localhost:3000/registros-habitos';
+    const api = 'http://localhost:3000/registros';
 
     function mostrarResultado(data) {
-      document.getElementById('resultado').textContent = JSON.stringify(data, null, 2);
+      const resultadoDiv = document.getElementById('resultado');
+
+      if (!data) {
+        resultadoDiv.textContent = 'No hay datos para mostrar';
+        return;
+      }
+
+      const arrayData = Array.isArray(data) ? data : [data];
+
+      if (arrayData.length === 0) {
+        resultadoDiv.textContent = 'No hay registros para mostrar';
+        return;
+      }
+
+      const keys = Object.keys(arrayData[0]);
+      let html = '<table><thead><tr>';
+
+      keys.forEach(k => {
+        html += `<th>${k}</th>`;
+      });
+
+      html += '</tr></thead><tbody>';
+
+      arrayData.forEach(row => {
+        html += '<tr>';
+        keys.forEach(k => {
+          const valor = row[k] === null || row[k] === undefined
+            ? ''
+            : (typeof row[k] === 'object' ? JSON.stringify(row[k]) : row[k]);
+          html += `<td>${valor}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+
+      resultadoDiv.innerHTML = html;
     }
 
     async function obtenerRegistrosPorUsuario() {
-      const usuarioId = document.getElementById('usuarioRegistroId').value;
-      const res = await fetch(`${api}/usuario/${usuarioId}`);
-      const data = await res.json();
-      mostrarResultado(data);
+      const usuarioId = document.getElementById('usuarioIdRegistro').value;
+      if (!usuarioId) {
+        alert('Por favor ingresa un ID de usuario');
+        return;
+      }
+      try {
+        const res = await fetch(`${api}/usuario/${usuarioId}`);
+        if (!res.ok) throw new Error('No se encontraron registros para ese usuario');
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = error.message;
+      }
     }
 
-    async function crearRegistroHabito() {
-      const usuarioId = document.getElementById('registroUsuarioId').value;
-      const habitoId = document.getElementById('registroHabitoId').value;
-      const dias = parseInt(document.getElementById('registroDias').value);
-      const meta = parseInt(document.getElementById('registroMeta').value);
+    async function crearRegistro() {
+      const usuarioId = document.getElementById('nuevoUsuarioIdRegistro').value;
+      const habitoId = document.getElementById('nuevoHabitoIdRegistro').value;
 
-      const res = await fetch(api, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuarioId, habitoId, progreso: { dias_consecutivos: dias, meta } })
-      });
+      if (!usuarioId || !habitoId) {
+        alert('Por favor completa todos los campos');
+        return;
+      }
 
-      const data = await res.json();
-      mostrarResultado(data);
+      try {
+        const res = await fetch(api, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuarioId, habitoId }),
+        });
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch {
+        document.getElementById('resultado').textContent = 'Error al crear registro';
+      }
     }
 
-    async function actualizarRegistroHabito() {
-      const id = document.getElementById('actualizarRegistroId').value;
-      const dias = parseInt(document.getElementById('nuevosDias').value);
-      const meta = parseInt(document.getElementById('nuevaMeta').value);
-
-      const res = await fetch(`${api}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ progreso: { dias_consecutivos: dias, meta } })
-      });
-
-      const data = await res.json();
-      mostrarResultado(data);
-    }
-
-    async function eliminarRegistroHabito() {
+    async function eliminarRegistro() {
       const id = document.getElementById('eliminarRegistroId').value;
-      const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      mostrarResultado(data);
+      if (!id) {
+        alert('Por favor ingresa un ID para eliminar');
+        return;
+      }
+      try {
+        const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('No se pudo eliminar el registro');
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = error.message;
+      }
     }
   </script>
 </body>
