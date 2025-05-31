@@ -24,23 +24,23 @@
   <main>
     <div class="buttons">
       <div>
-        <input type="number" id="retoIdParticipaciones" placeholder="ID del reto">
+        <input type="number" id="retoIdParticipaciones" placeholder="ID del reto" />
         <button onclick="obtenerParticipacionesPorReto()">Ver participantes</button>
       </div>
 
       <div>
-        <input type="number" id="nuevoUsuarioId" placeholder="ID del usuario">
-        <input type="number" id="nuevoRetoId" placeholder="ID del reto">
+        <input type="number" id="nuevoUsuarioId" placeholder="ID del usuario" />
+        <input type="number" id="nuevoRetoId" placeholder="ID del reto" />
         <button onclick="unirseAReto()">Unirse a reto</button>
       </div>
 
       <div>
-        <input type="number" id="completarParticipacionId" placeholder="ID de participación">
+        <input type="number" id="completarParticipacionId" placeholder="ID de participación" />
         <button onclick="marcarComoCompletado()">Marcar como completado</button>
       </div>
 
       <div>
-        <input type="number" id="eliminarParticipacionId" placeholder="ID de participación">
+        <input type="number" id="eliminarParticipacionId" placeholder="ID de participación" />
         <button onclick="abandonarReto()">Abandonar reto</button>
       </div>
     </div>
@@ -53,48 +53,115 @@
     const api = 'http://localhost:3000/participaciones';
 
     function mostrarResultado(data) {
-      document.getElementById('resultado').textContent = JSON.stringify(data, null, 2);
+      const resultadoDiv = document.getElementById('resultado');
+
+      if (!data) {
+        resultadoDiv.textContent = 'No hay datos para mostrar';
+        return;
+      }
+
+      const arrayData = Array.isArray(data) ? data : [data];
+
+      if (arrayData.length === 0) {
+        resultadoDiv.textContent = 'No hay registros para mostrar';
+        return;
+      }
+
+      const keys = Object.keys(arrayData[0]);
+      let html = '<table><thead><tr>';
+
+      keys.forEach(k => {
+        html += `<th>${k}</th>`;
+      });
+
+      html += '</tr></thead><tbody>';
+
+      arrayData.forEach(row => {
+        html += '<tr>';
+        keys.forEach(k => {
+          const valor = row[k] === null || row[k] === undefined
+            ? ''
+            : (typeof row[k] === 'object' ? JSON.stringify(row[k]) : row[k]);
+          html += `<td>${valor}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+
+      resultadoDiv.innerHTML = html;
     }
 
     async function obtenerParticipacionesPorReto() {
       const retoId = document.getElementById('retoIdParticipaciones').value;
-      const res = await fetch(`${api}/reto/${retoId}`);
-      const data = await res.json();
-      mostrarResultado(data);
+      if (!retoId) {
+        alert('Por favor ingresa un ID de reto');
+        return;
+      }
+      try {
+        const res = await fetch(`${api}/reto/${retoId}`);
+        if (!res.ok) throw new Error('No se encontraron participaciones para ese reto');
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = error.message;
+      }
     }
 
     async function unirseAReto() {
       const usuarioId = document.getElementById('nuevoUsuarioId').value;
       const retoId = document.getElementById('nuevoRetoId').value;
 
-      const res = await fetch(api, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuarioId, retoId })
-      });
+      if (!usuarioId || !retoId) {
+        alert('Por favor completa todos los campos');
+        return;
+      }
 
-      const data = await res.json();
-      mostrarResultado(data);
+      try {
+        const res = await fetch(api, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuarioId, retoId }),
+        });
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch {
+        document.getElementById('resultado').textContent = 'Error al unirse al reto';
+      }
     }
 
     async function marcarComoCompletado() {
-      const id = document.getElementById('completarParticipacionId').value;
-
-      const res = await fetch(`${api}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ completado: true })
-      });
-
-      const data = await res.json();
-      mostrarResultado(data);
+      const participacionId = document.getElementById('completarParticipacionId').value;
+      if (!participacionId) {
+        alert('Por favor ingresa un ID de participación');
+        return;
+      }
+      try {
+        const res = await fetch(`${api}/${participacionId}/completar`, {
+          method: 'PUT',
+        });
+        if (!res.ok) throw new Error('No se pudo marcar como completado');
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = error.message;
+      }
     }
 
     async function abandonarReto() {
-      const id = document.getElementById('eliminarParticipacionId').value;
-      const res = await fetch(`${api}/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      mostrarResultado(data);
+      const participacionId = document.getElementById('eliminarParticipacionId').value;
+      if (!participacionId) {
+        alert('Por favor ingresa un ID de participación para eliminar');
+        return;
+      }
+      try {
+        const res = await fetch(`${api}/${participacionId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('No se pudo abandonar el reto');
+        const data = await res.json();
+        mostrarResultado(data);
+      } catch (error) {
+        document.getElementById('resultado').textContent = error.message;
+      }
     }
   </script>
 </body>
